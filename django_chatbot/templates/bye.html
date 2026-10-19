@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Déconnexion{% endblock %}
+
+{% block styles %}
+<style>
+  body {
+    background: linear-gradient(to right, #2575fc, #6a11cb);
+    font-family: 'Open Sans', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    color: white;
+  }
+
+  #container {
+    text-align: center;
+  }
+
+  #goodbye-text {
+    font-size: 32px;
+    font-weight: bold;
+    opacity: 0;
+    animation: fadeIn 2s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px);}
+    to { opacity: 1; transform: translateY(0);}
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0);}
+    to { opacity: 0; transform: translateY(-20px);}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="container">
+  <p id="goodbye-text">Au revoir ! 👋</p>
+</div>
+
+<script>
+ 
+  setTimeout(() => {
+    const text = document.getElementById('goodbye-text');
+    text.style.transition = "opacity 1s, transform 1s";
+    text.style.opacity = 0;
+    text.style.transform = "translateY(-20px)";
+  }, 3000);
+
+
+  setTimeout(() => {
+    window.location.href = "{% url 'home' %}";
+  }, 4000);
+</script>
+{% endblock %}

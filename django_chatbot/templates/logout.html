@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 80vh;">
+  <div class="card shadow-lg" style="width: 400px;">
+    <div class="card-header bg-danger text-white text-center">
+      <h4>Logged Out</h4>
+    </div>
+    <div class="card-body text-center">
+      <p class="mb-4">You have been successfully logged out.</p>
+
+      <a href="{% url 'login' %}" class="btn btn-primary w-100 mb-2">
+        Login Again
+      </a>
+
+      <a href="{% url 'chatbot_page' %}" class="btn btn-outline-secondary w-100">
+        Go to Chat
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

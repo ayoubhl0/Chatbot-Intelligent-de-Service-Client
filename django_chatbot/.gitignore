@@ -1,0 +1,12 @@
+
+venv/
+tf_env/
+django_chatbot/venv/
+django_chatbot/tf_env/
+__pycache__/
+*.py[cod]
+.env
+.vscode/
+.idea/
+
+

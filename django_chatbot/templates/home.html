@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Accueil - Chatbot</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #74ABE2, #5563DE);
+            color: #fff;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(0,0,0,0.2);
+            padding: 50px 80px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .btn {
+            display: inline-block;
+            margin: 15px;
+            padding: 15px 35px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .btn-login {
+            background-color: #FF6B6B;
+        }
+
+        .btn-login:hover {
+            background-color: #FF4C4C;
+            transform: translateY(-3px);
+        }
+
+        .btn-register {
+            background-color: #4ECDC4;
+        }
+
+        .btn-register:hover {
+            background-color: #38B0A0;
+            transform: translateY(-3px);
+        }
+
+        .user-info {
+            margin-top: 30px;
+        }
+
+        .user-info button {
+            margin: 10px;
+            background-color: #FFD93D;
+            color: #333;
+        }
+
+        .user-info button:hover {
+            background-color: #FFC107;
+            transform: translateY(-3px);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bienvenue sur le Chatbot</h1>
+
+        {% if user.is_authenticated %}
+            <div class="user-info">
+                <p>Connecté en tant que <strong>{{ user.username }}</strong></p>
+                <a href="{% url 'chatbot_page' %}" class="btn">Accéder au Chatbot</a>
+                <a href="{% url 'logout' %}" class="btn">Logout</a>
+                
+            </div>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-login">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-register">Register</a>
+        {% endif %}
+    </div>
+</body>
+</html>

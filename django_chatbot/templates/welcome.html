@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Welcome Animation</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
+  background: #fff;
+}
+
+/* CENTER */
+.criterion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* TEXT */
+.line {
+  display: flex;
+  justify-content: center;
+}
+
+.letter {
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  line-height: 40px;
+  font-size: 28px;
+  opacity: 0;
+  transform: scale(0);
+  animation: textIn 1s forwards;
+}
+
+@keyframes textIn {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* SECOND TEXT */
+.second {
+  margin-top: 20px;
+  font-size: 24px;
+  opacity: 0;
+  animation: fadeIn 2s forwards;
+  animation-delay: 6s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* BACKGROUND */
+.bg {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 0;
+  animation: bgAnim 2s forwards;
+}
+
+@keyframes bgAnim {
+  0% { width: 0; opacity: 1; }
+  50% { width: 12.5%; }
+  100% { width: 25%; opacity: 0; }
+}
+</style>
+
+</head>
+<body>
+
+<div class="criterion" id="container"></div>
+
+<script>
+const text = ['W','e','l','c','o','m','e'];
+const container = document.getElementById("container");
+
+/* BACKGROUND */
+text.forEach((_, i) => {
+  let bg = document.createElement("div");
+  bg.className = "bg";
+  bg.style.left = (i * 12.5) + "%";
+  bg.style.background = `hsl(${i * 45}, 80%, 60%)`;
+  bg.style.animationDelay = "4s";
+  document.body.appendChild(bg);
+});
+
+/* FIRST LINE */
+let line1 = document.createElement("div");
+line1.className = "line";
+container.appendChild(line1);
+
+text.forEach((char, i) => {
+  let span = document.createElement("div");
+  span.className = "letter";
+  span.innerText = char;
+  span.style.animationDelay = (1 + i * 0.2) + "s";
+  line1.appendChild(span);
+});
+
+/* SECOND LINE */
+let second = document.createElement("div");
+second.className = "second";
+second.innerText = "To AI Chatbot";
+container.appendChild(second);
+
+/* ⏳ REDIRECT AFTER 20 SECONDS */
+
+    setTimeout(() => {
+        window.location.href = "{% url 'chatbot_page' %}";
+    }, 20000);
+
+</script>
+
+</body>
+</html>

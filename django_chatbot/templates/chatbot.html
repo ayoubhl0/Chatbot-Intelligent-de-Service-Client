@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}AI ChatGPT{% endblock %}
+
+{% block styles %}
+<style>
+html, body { height: 100%; margin: 0; font-family: Arial, sans-serif; }
+.chat-container { display: flex; flex-direction: column; height: 100vh; }
+.messages-box { flex: 1; overflow-y: auto; padding: 15px; background: #f5f5f5; }
+.messages-list { list-style: none; padding: 0; margin: 0; }
+.message { margin-bottom: 10px; display: flex; flex-direction: column; }
+.message-text { padding: 10px; border-radius: 8px; max-width: 70%; }
+.sent { background-color: #dcf8c6; align-self: flex-end; }
+.received { background-color: #f1f0f0; align-self: flex-start; }
+.message-form { display: flex; padding: 10px; background: #eee; }
+.message-input { flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
+.btn-send { padding: 8px 15px; margin-left: 5px; border-radius: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+.btn-new { margin-left: 10px; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+#signVideo { width: 160px; height: 120px; border: 2px solid #ccc; border-radius: 5px; margin-right: 10px; display:none; }
+#gestureText { margin-top: 5px; font-weight: bold; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+
+  <!-- HEADER -->
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#ddd;">
+    <span>💬 Chat avec AI Chatbot</span>
+    <div>
+      <a href="{% url 'chat_history' %}"><button class="btn-new" style="background:#6f42c1;">Historique</button></a>
+  <a href="{% url 'profile' %}"><button class="btn-new" style="background:#0e2ac8;">Profil</button></a>
+      <form method="post" action="{% url 'new_chat' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn-new">Nouveau Chat</button>
+      </form>
+
+      <form method="post" action="{% url 'logout' %}" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">
+        Logout
+    </button>
+</form>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="messages-box">
+    <ul class="messages-list">
+      {% if not chats %}
+      <li class="message received">
+        <div class="message-text">
+          <b>AI Chatbot:</b> Salut {{ user.username }}, je suis ton AI Chatbot.
+        </div>
+      </li>
+      {% else %}
+      {% for chat in chats %}
+        <li class="message sent">
+          <div class="message-text">
+            <b>{{ chat.user.username }}</b>: {{ chat.message }}
+          </div>
+        </li>
+        <li class="message received">
+          <div class="message-text">
+            <b>AI Chatbot</b>: {{ chat.response }}
+          </div>
+        </li>
+      {% endfor %}
+      {% endif %}
+    </ul>
+  </div>
+
+  <!-- SIGN LANGUAGE + VOICE -->
+  <div style="display:flex; align-items:center; padding:10px; background:#eee;">
+    <button type="button" id="signBtn" class="btn-new" style="background:#17a2b8; margin-right:10px;">🤟 Sign</button>
+    <video id="signVideo" autoplay></video>
+    <p id="gestureText"></p>
+
+    <button id="voiceToggle" class="btn-new" style="background:#ffc107; margin-left:10px;">🎤 Voice</button>
+
+    <form class="message-form" style="flex:1; display:flex; margin-left:10px;">
+      <input type="text" class="message-input" placeholder="Tapez votre message..." autocomplete="off" />
+      <button type="submit" class="btn-send">Envoyer</button>
+    </form>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script>
+// ====== CSRF ======
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+// ====== SCROLL ======
+const messagesList = document.querySelector('.messages-list');
+function scrollToBottom() { messagesList.parentElement.scrollTop = messagesList.parentElement.scrollHeight; }
+scrollToBottom();
+
+// ====== SEND MESSAGE ======
+const messageForm = document.querySelector('.message-form');
+const messageInput = document.querySelector('.message-input');
+messageForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const message = messageInput.value.trim();
+  if(!message) return;
+  appendUserMessage(message);
+  await sendToChatbot(message);
+  messageInput.value = '';
+});
+
+function appendUserMessage(msg){ 
+  const li = document.createElement('li');
+  li.classList.add('message','sent');
+  li.innerHTML = `<div class="message-text"><b>You</b>: ${msg}</div>`;
+  messagesList.appendChild(li); scrollToBottom();
+}
+function appendBotMessage(msg){ 
+  const li = document.createElement('li');
+  li.classList.add('message','received');
+  li.innerHTML = `<div class="message-text"><b>AI Chatbot</b>: ${msg}</div>`;
+  messagesList.appendChild(li); scrollToBottom();
+  if(msg){ const utter = new SpeechSynthesisUtterance(msg); window.speechSynthesis.speak(utter); }
+}
+
+async function sendToChatbot(message){
+  try{
+    const res = await fetch('{% url "chatbot_json" %}', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json','X-CSRFToken': csrftoken },
+      body: JSON.stringify({ message })
+    });
+    const data = await res.json();
+    appendBotMessage(data.response || "⚠️ Erreur: API non disponible");
+  }catch(err){ appendBotMessage("⚠️ Erreur réseau ou API"); console.error(err); }
+}
+
+// ====== SIGN LANGUAGE ======
+let lastGesture = "", lastTime = 0;
+document.getElementById('signBtn').addEventListener('click', startSignMode);
+async function startSignMode(){
+  const video = document.getElementById('signVideo');
+  const gestureText = document.getElementById('gestureText');
+  video.style.display='block';
+  const stream = await navigator.mediaDevices.getUserMedia({video:true});
+  video.srcObject = stream;
+
+  const hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+  hands.setOptions({ maxNumHands:1, modelComplexity:1 });
+
+  hands.onResults(async results=>{
+    if(results.multiHandLandmarks?.length>0){
+      const landmarks = results.multiHandLandmarks[0].map(pt=>[pt.x,pt.y,pt.z]).flat();
+      try{
+        const res = await fetch('{% url "predict_sign" %}',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','X-CSRFToken': csrftoken},
+          body: JSON.stringify({ landmarks })
+        });
+        const data = await res.json();
+        const gesture = data.gesture || "unknown";
+        const now = Date.now();
+        if(gesture!=="unknown" && (gesture!==lastGesture||(now-lastTime)>2000)){
+          lastGesture=gesture; lastTime=now;
+          gestureText.innerText=`🤟 Gesture: ${gesture}`;
+          appendUserMessage(gesture);
+          appendBotMessage(data.response || "⚠️ Pas de réponse");
+        }
+      }catch(err){ console.error(err); }
+    }
+  });
+
+  const camera = new Camera(video,{ onFrame: async ()=>{ await hands.send({image:video}); }, width:300, height:300 });
+  camera.start();
+}
+
+// ====== VOICE RECOGNITION ======
+let recognizing=false, recognition;
+const voiceToggle=document.getElementById('voiceToggle');
+if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang='fr-FR'; recognition.continuous=false; recognition.interimResults=false;
+
+  recognition.onstart = ()=>{ recognizing=true; voiceToggle.innerText="🎤 Listening..."; }
+  recognition.onend = ()=>{ recognizing=false; voiceToggle.innerText="🎤 Voice"; }
+  recognition.onerror = e=>{ console.error(e); recognizing=false; voiceToggle.innerText="🎤 Voice"; }
+
+  recognition.onresult = async e=>{
+    const speech = e.results[0][0].transcript;
+    appendUserMessage(speech);
+    await sendToChatbot(speech);
+  }
+}
+
+voiceToggle.addEventListener('click', ()=>{
+  if(recognizing){ recognition.stop(); } else { recognition.start(); }
+});
+</script>
+{% endblock %}

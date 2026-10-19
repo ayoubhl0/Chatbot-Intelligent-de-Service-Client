@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+body {
+    background: linear-gradient(135deg, #dbeafe, #60a5fa);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* CONTAINER */
+.profile-container {
+    max-width: 550px;
+    margin: 60px auto;
+    padding: 25px;
+}
+
+/* HEADER */
+.profile-header {
+    text-align: center;
+    margin-bottom: 25px;
+    color: white;
+}
+
+.profile-header h2 {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.profile-header p {
+    opacity: 0.9;
+}
+
+/* GLASS CARD */
+.card {
+    background: rgba(255,255,255,0.92);
+    padding: 22px;
+    border-radius: 16px;
+    margin-bottom: 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    backdrop-filter: blur(10px);
+    transition: 0.3s ease;
+    border-left: 6px solid #2563eb;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* INPUTS */
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    transition: 0.2s;
+    font-size: 14px;
+}
+
+input:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 8px rgba(37,99,235,0.3);
+}
+
+/* BUTTONS */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-primary { background: #2563eb; color: white; }
+.btn-warning { background: #1d4ed8; color: white; }
+.btn-danger { background: #1e3a8a; color: white; }
+
+button:hover {
+    transform: scale(1.02);
+    opacity: 0.95;
+}
+
+/* BACK BUTTON */
+.back-link {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+</style>
+
+<!-- BACK -->
+<div class="profile-container">
+    
+
+    <!-- HEADER -->
+    <div class="profile-header">
+        <h2> {{ user.username|title }}</h2>
+        <p>{{ user.email }}</p>
+    </div>
+<a href="{% url 'chatbot_page' %}" class="back-link" >⬅️ Retour au Chat</a>
+    <!-- CHANGE NAME -->
+    <div class="card">
+        <h4> Changer le nom</h4>
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Nouveau nom" required>
+            <button type="submit" name="update_name" class="btn-primary">
+                Modifier
+            </button>
+        </form>
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="card">
+        <h4> Changer mot de passe</h4>
+        <form method="post">
+            {% csrf_token %}
+            <input type="password" name="old_password" placeholder="Ancien mot de passe" required>
+            <input type="password" name="new_password" placeholder="Nouveau mot de passe" required>
+            <button type="submit" name="update_password" class="btn-warning">
+                Changer
+            </button>
+        </form>
+    </div>
+
+    <!-- DELETE -->
+    <div class="card">
+        <h4 style="color:#1e3a8a;"> Supprimer compte</h4>
+        <form method="post" onsubmit="return confirm('Supprimer votre compte ?');">
+            {% csrf_token %}
+            <button type="submit" name="delete_account" class="btn-danger">
+                Supprimer définitivement
+            </button>
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}

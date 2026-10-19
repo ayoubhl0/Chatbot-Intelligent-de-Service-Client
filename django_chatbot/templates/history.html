@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Historique du Chat{% endblock %}
+
+{% block styles %}
+<style>
+body { font-family:'Segoe UI', sans-serif; background:#f0f2f5; margin:0; padding:0; }
+.container { max-width:900px; margin:20px auto; padding:15px; background:white; border-radius:10px; box-shadow:0 0 15px rgba(0,0,0,0.1); }
+h2 { text-align:center; color:#4b6cb7; }
+
+.search-form { display:flex; gap:10px; margin-bottom:20px; }
+.search-form input { flex:1; padding:8px 12px; border-radius:25px; border:1px solid #ccc; }
+.search-form button { padding:8px 15px; border-radius:25px; border:none; background:#4b6cb7; color:white; cursor:pointer; }
+
+.day-container { border:1px solid #ccc; border-radius:8px; margin-bottom:10px; overflow:hidden; }
+.day-header { display:flex; justify-content:space-between; align-items:center; padding:10px 15px; background:linear-gradient(to right,#182848,#4b6cb7); color:white; cursor:pointer; }
+.day-header b { font-size:16px; }
+.day-actions { display:flex; gap:5px; }
+.day-actions input { padding:2px 6px; border-radius:4px; border:none; }
+.day-actions button { padding:4px 8px; border-radius:4px; border:none; cursor:pointer; font-size:12px; }
+
+.day-actions .delete-btn { background:#dc3545; color:white; }
+.day-actions .rename-btn { background:#ffc107; color:white; }
+
+.chat-content { display:none; background:#f9f9f9; padding:10px 15px; }
+.chat-message { border:1px solid #eee; border-radius:8px; padding:8px 10px; margin-bottom:8px; background:white; }
+.chat-message b { color:#4b6cb7; }
+.chat-message small { color:#888; display:block; margin-top:4px; }
+.back-link { display:inline-block; margin-bottom:15px; color:#4b6cb7; text-decoration:none; font-weight:bold; }
+.back-link:hover { text-decoration:underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2>Historique du Chat</h2>
+
+  <form method="get" action="" class="search-form">
+      <input type="text" name="q" placeholder="Recherche..." value="{{ query }}">
+      <button type="submit"> Rechercher</button>
+  </form>
+
+  <a href="{% url 'chatbot_page' %}" class="back-link">⬅️ Retour au Chat</a>
+
+  {% for day in days_list %}
+  <div class="day-container">
+    <div class="day-header" onclick="toggleChat('day-{{ forloop.counter }}')">
+      <span><b>{{ day.summary }}</b> ({{ day.date }})</span>
+      <div class="day-actions">
+        <form method="post" action="{% url 'delete_day' day_date=day.date|date:'Y-m-d' %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="delete-btn" onclick="return confirm('Supprimer tous les messages du {{ day.date|date:"d/m/Y" }} ?');">Supprimer</button>
+        </form>
+        <form method="post" action="{% url 'rename_day' day_date=day.date|date:'Y-m-d' %}" style="display:inline;">
+          {% csrf_token %}
+          <input type="text" name="new_name" placeholder="Nouvelle nom" required>
+          <button type="submit" class="rename-btn">Renommer</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="day-{{ forloop.counter }}" class="chat-content">
+      {% for chat in day.chats %}
+      <div class="chat-message">
+        <b>Vous:</b> {{ chat.message }}<br>
+        <b>AI:</b> {{ chat.response }}<br>
+        <small>{{ chat.created_at }}</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+function toggleChat(id){
+  const el=document.getElementById(id);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+</script>
+{% endblock %}

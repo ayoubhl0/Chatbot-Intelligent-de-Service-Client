@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block styles %}
+
+<style>
+  body {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .login-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 450px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    background-color: #2575fc;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    padding: 25px 0;
+  }
+
+  .card-body {
+    padding: 30px 25px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    transition: 0.3s;
+  }
+
+  .form-group input:focus {
+    border-color: #2575fc;
+    outline: none;
+    box-shadow: 0 0 5px rgba(37,117,252,0.5);
+  }
+
+  button[type=submit] {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    background-color: #2575fc;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button[type=submit]:hover {
+    background-color: #6a11cb;
+  }
+
+  .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    border: 1px solid #f5c6cb;
+  }
+
+  .links {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+
+  .links a {
+    text-decoration: none;
+    color: #2575fc;
+    font-weight: bold;
+  }
+
+  .links a:hover {
+    color: #6a11cb;
+  }
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="login-container">
+  <div class="card-header">Se connecter</div>
+
+  <div class="card-body">
+
+
+{% if error_message %}
+  <div class="alert alert-danger">
+    {{ error_message }}
+  </div>
+{% endif %}
+
+<form method="POST">
+  {% csrf_token %}
+
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input
+      type="email"
+      id="email"
+      name="email"
+      placeholder="Entrez votre email"
+      required
+    >
+  </div>
+
+  <div class="form-group">
+    <label for="password">Mot de passe</label>
+    <input
+      type="password"
+      id="password"
+      name="password"
+      placeholder="Entrez votre mot de passe"
+      required
+    >
+  </div>
+
+  <button type="submit">Login</button>
+</form>
+
+<div class="links">
+  <a href="{% url 'home' %}">⬅ Retour à l'accueil</a>
+  <a href="{% url 'motdepasse_oublie' %}">Mot de passe oublié ?</a>
+</div>
+
+  </div>
+</div>
+{% endblock %}

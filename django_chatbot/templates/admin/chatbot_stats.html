@@ -1,0 +1,11 @@
+
+={% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>📊 Statistiques du Chatbot</h1>
+<ul>
+  <li>Nombre d’utilisateurs : {{ total_users }}</li>
+  <li>Utilisateurs actifs : {{ active_users }}</li>
+  <li>Nombre de messages : {{ total_messages }}</li>
+</ul>
+{% endblock %}
